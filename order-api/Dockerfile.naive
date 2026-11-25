@@ -1,7 +1,7 @@
 # "BEFORE" version: the naive way.
 # Uses the full Maven + JDK image both to build AND to run the service.
 # Copies everything at once: any source change re-downloads every dependency.
-FROM maven:3.9-eclipse-temurin-21
+FROM maven:3.9-eclipse-temurin-26
 
 WORKDIR /app
 COPY . .
