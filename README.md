@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Java 21](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F)
+![Java 25](https://img.shields.io/badge/Java-25-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.2-6DB33F)
 
 Hands-on lab of advanced backend and DevOps concepts, built one concept at a time on top of a small order platform.
 Each step is documented as an [Architecture Decision Record](docs/adr/) and explained in a LinkedIn post of the series **"Do conceito à prática"**.
@@ -37,7 +37,7 @@ Dashed parts arrive in upcoming steps.
 
 ## Running locally
 
-Requirements: Docker. (Java 21 only if you want to run outside containers.)
+Requirements: Docker. (Java 25 only if you want to run outside containers.)
 
 ```bash
 docker compose up --build -d
