@@ -3,7 +3,7 @@
 
 # 1) Build: resolve dependencies in their own cached layer, then compile.
 #    The Maven Wrapper pins the exact Maven version (and its checksum) used locally and in CI.
-FROM eclipse-temurin:21-jdk AS build
+FROM eclipse-temurin:25-jdk AS build
 # Without unzip, mvnw silently downloads the .tar.gz instead of the .zip and the pinned
 # distributionSha256Sum (computed for the .zip) no longer matches.
 RUN apt-get update \
@@ -17,13 +17,13 @@ COPY src/ src/
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -q package -DskipTests
 
 # 2) Split the jar into layers: dependencies rarely change, application code changes often.
-FROM eclipse-temurin:21-jre AS extract
+FROM eclipse-temurin:25-jre AS extract
 WORKDIR /extract
 COPY --from=build /src/target/order-api.jar app.jar
 RUN java -Djarmode=tools -jar app.jar extract --layers --launcher --destination layers
 
 # 3) Runtime: just the JRE, no shell, no package manager, non-root user.
-FROM gcr.io/distroless/java21-debian12:nonroot
+FROM gcr.io/distroless/java25-debian13:nonroot
 WORKDIR /app
 COPY --from=extract /extract/layers/dependencies/ ./
 COPY --from=extract /extract/layers/spring-boot-loader/ ./

@@ -1,6 +1,6 @@
 # 0002. Java 21 and Spring Boot for services
 
-- **Status:** Accepted
+- **Status:** Superseded by [0003](0003-java-25-and-spring-boot-4.md)
 - **Date:** 2026-11-25
 
 ## Context
