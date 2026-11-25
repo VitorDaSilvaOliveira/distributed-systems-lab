@@ -35,3 +35,7 @@ cd order-api
 ## Architecture decisions
 
 Any significant decision gets an ADR in [`docs/adr/`](docs/adr/), copied from [`0000-template.md`](docs/adr/0000-template.md).
+
+## Releases
+
+Versions, tags and the changelog are automated with release-please; see [docs/releasing.md](docs/releasing.md).
