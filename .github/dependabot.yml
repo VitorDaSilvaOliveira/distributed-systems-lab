@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/order-api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    groups:
+      spring:
+        patterns: ["org.springframework*"]
+    commit-message:
+      prefix: "build(deps)"
+    labels: ["dependencies", "java"]
+
+  - package-ecosystem: "docker"
+    directory: "/order-api"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "build(docker)"
+    labels: ["dependencies", "docker"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci(deps)"
+    labels: ["dependencies", "ci"]

@@ -1,0 +1,6 @@
+target/
+Dockerfile*
+.git
+*.md
+.idea/
+.vscode/
