@@ -1,0 +1,23 @@
+name: Feature / step
+description: A new capability or a step of the series
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should exist when this is done?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: input
+    id: concept
+    attributes:
+      label: Concept / post
+      placeholder: "#1 Containers"
