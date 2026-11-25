@@ -1,0 +1,39 @@
+name: Release
+
+# release-please reads the Conventional Commits on main and keeps a release PR open with the
+# next version and its changelog. Merging that PR creates the tag and the GitHub release.
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Release PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Skipped until the release GitHub App is configured (see docs/releasing.md).
+    if: vars.RELEASE_APP_CLIENT_ID != ''
+    permissions: {}
+    steps:
+      # A GitHub App token instead of GITHUB_TOKEN: PRs opened with GITHUB_TOKEN do not trigger
+      # workflows, so the release PR would never get the required CI checks.
+      - name: Get release app token
+        id: app-token
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
