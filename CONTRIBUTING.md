@@ -4,8 +4,9 @@
 
 1. Open (or pick) an issue.
 2. Create a short-lived branch from `main`: `feat/outbox-relay`, `docs/adr-0003`, `ci/trivy-scan`.
-3. Open a pull request. CI must be green.
-4. Squash and merge. The PR title becomes the commit on `main`, so it must follow Conventional Commits.
+3. Open a pull request. CI must be green and the branch up to date with `main`.
+4. Squash and merge. The PR title becomes the commit on `main`, so it must follow Conventional Commits
+   (checked by the `PR title` workflow).
 
 ## Commit / PR titles
 
@@ -18,7 +19,8 @@
 | `docs` | documentation and ADRs |
 | `ci` | workflows |
 | `build` | build system, dependencies, Dockerfiles |
-| `refactor`, `test`, `chore` | the obvious |
+| `perf` | performance improvement |
+| `refactor`, `test`, `chore`, `revert` | the obvious |
 
 Example: `feat(order-api): publish OrderCreated via outbox`
 

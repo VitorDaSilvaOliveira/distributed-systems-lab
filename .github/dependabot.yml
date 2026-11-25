@@ -1,4 +1,11 @@
 version: 2
+
+# One grouped PR per ecosystem per week keeps the noise low.
+# Java major versions and Spring Boot major/minor versions are architectural decisions
+# (see docs/adr/0003-java-25-and-spring-boot-4.md): they are ignored here and upgraded through an ADR.
+# The cooldown waits a few days after a release before proposing it, which avoids
+# freshly published (possibly compromised or broken) versions.
+
 updates:
   - package-ecosystem: "maven"
     directory: "/order-api"
@@ -7,25 +14,52 @@ updates:
       day: "monday"
       time: "08:00"
       timezone: "America/Sao_Paulo"
+    cooldown:
+      default-days: 3
     groups:
-      spring:
-        patterns: ["org.springframework*"]
+      maven:
+        patterns: ["*"]
+    ignore:
+      - dependency-name: "org.springframework.boot:*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
     commit-message:
       prefix: "build(deps)"
-    labels: ["dependencies", "java"]
+    labels: ["type:dependencies"]
 
   - package-ecosystem: "docker"
     directory: "/order-api"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    cooldown:
+      default-days: 3
+    groups:
+      docker:
+        patterns: ["*"]
+    ignore:
+      # Tags carry the Java major version (e.g. 25-jdk): moving to another Java is an ADR.
+      - dependency-name: "eclipse-temurin"
+        update-types: ["version-update:semver-major"]
+      # Dockerfile.naive is the frozen "before" picture of step #1.
+      - dependency-name: "maven"
     commit-message:
       prefix: "build(docker)"
-    labels: ["dependencies", "docker"]
+    labels: ["type:dependencies"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    cooldown:
+      default-days: 3
+    groups:
+      actions:
+        patterns: ["*"]
     commit-message:
       prefix: "ci(deps)"
-    labels: ["dependencies", "ci"]
+    labels: ["type:dependencies"]

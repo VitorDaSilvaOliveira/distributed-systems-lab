@@ -5,8 +5,8 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: read
+# Least privilege: no token permissions by default; each job asks for what it needs.
+permissions: {}
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -16,30 +16,42 @@ jobs:
   build:
     name: Build & test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: order-api
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v6
+      # Actions are pinned to full commit SHAs (tags are mutable); Dependabot keeps them current.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: temurin
           java-version: "25"
           cache: maven
       - name: Verify (compile, test, format, coverage)
-        run: ./mvnw -B verify
+        run: ./mvnw -B -ntp verify
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: jacoco-report
           path: order-api/target/site/jacoco
+          if-no-files-found: ignore
 
   docker:
     name: Docker image
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: build
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Build image
         run: docker build -t order-api:ci order-api
