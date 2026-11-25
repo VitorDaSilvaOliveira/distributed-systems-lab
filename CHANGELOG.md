@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.2.0...v0.2.1) (2026-11-25)
+
+
+### Documentation
+
+* translate the README into Portuguese and Spanish ([#25](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/25)) ([e053c02](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/e053c02e9d526f41e4b3a6bb8a5ab90da8f1b79a))
+
 ## [0.2.0](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.1.1...v0.2.0) (2026-11-25)
 
 
