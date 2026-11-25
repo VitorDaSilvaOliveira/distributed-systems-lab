@@ -1,0 +1,28 @@
+name: Docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  translations:
+    name: Translations in sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The English documents are the source of truth; every translation records which
+      # version of its source it was translated from (see scripts/translations.sh).
+      - name: Check translations
+        run: scripts/translations.sh check
