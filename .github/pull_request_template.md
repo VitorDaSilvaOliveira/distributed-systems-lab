@@ -17,3 +17,4 @@ Closes #
 - [ ] Tests added or updated
 - [ ] ADR added/updated if an architectural decision was made
 - [ ] README roadmap updated if a step was completed
+- [ ] Translations updated (`scripts/translations.sh check`)

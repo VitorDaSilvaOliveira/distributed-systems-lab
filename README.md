@@ -1,5 +1,7 @@
 # distributed-systems-lab
 
+**English** | [Português](README.pt-BR.md) | [Español](README.es.md)
+
 [![CI](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Java 25](https://img.shields.io/badge/Java-25-orange)
@@ -59,6 +61,7 @@ cd order-api
 ```
 order-api/        Spring Boot service
 k6/               load tests
+scripts/          repository tooling
 docs/adr/         architecture decision records
 .github/          CI workflows, templates, Dependabot
 ```

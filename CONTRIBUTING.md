@@ -39,3 +39,16 @@ Any significant decision gets an ADR in [`docs/adr/`](docs/adr/), copied from [`
 ## Releases
 
 Versions, tags and the changelog are automated with release-please; see [docs/releasing.md](docs/releasing.md).
+
+## Translations
+
+English is the source of truth. The README is also available in
+[Portuguese](README.pt-BR.md) and [Spanish](README.es.md); ADRs and contributor docs stay in English.
+
+Each translation starts with a `translation-of` marker that records the version of the English file
+it was translated from. The `Docs` workflow fails when the English file changes and a translation does not:
+
+```bash
+scripts/translations.sh check              # what CI runs
+scripts/translations.sh sync README.es.md  # after updating a translation, record the new source version
+```
