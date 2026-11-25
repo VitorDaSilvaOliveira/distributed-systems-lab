@@ -14,9 +14,10 @@ While setting the repository up, three problems showed this in practice:
 
 - The branch ruleset required pull requests, but the admin role was on its bypass list, so the
   owner could still push anything straight to `main`. The required status checks list was empty.
-- Minutes after the first merge, Dependabot opened 7 pull requests. Two were safe; the others
-  changed the Java or Spring Boot generation (one did not even compile) or rewrote a Windows script
-  with CRLF line endings, a 378-line diff for a 2-line change.
+- Minutes after the first merge, Dependabot opened 7 pull requests. Two were merged as they
+  were; the others changed the Java or Spring Boot generation (one did not even compile), conflicted
+  with each other, or rewrote a Windows script with CRLF line endings, a 378-line diff for a
+  2-line change.
 - Pull requests opened with the workflow's `GITHUB_TOKEN` do not trigger other workflows, so an
   automated release pull request would never get the required checks.
 
