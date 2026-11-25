@@ -24,6 +24,7 @@ Dashed parts arrive in upcoming steps.
 
 | # | Concept | Status | ADR | Post |
 | --- | --- | --- | --- | --- |
+| 0 | Delivery workflow and repository guardrails | ✅ | [0004](docs/adr/0004-delivery-workflow.md) | — |
 | 1 | Lean and secure container images | 🚧 | — | — |
 | 2 | Queues vs. pub/sub | ⏳ | — | — |
 | 3 | Idempotency, retries and DLQ | ⏳ | — | — |
