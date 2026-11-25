@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.1.1...v0.2.0) (2026-11-25)
+
+
+### Documentation
+
+* record the delivery workflow (ADR 0004) ([#23](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/23)) ([72a41b6](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/72a41b679c72c22aa18b1f8e414b1c7b1398f247))
+
 ## [0.1.1](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.1.0...v0.1.1) (2026-11-25)
 
 
