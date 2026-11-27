@@ -65,8 +65,24 @@ measure() {
     >"$workdir/$name-rebuild.log" 2>&1
   result["$name.rebuild"]="$(seconds $(($(now_ms) - t0)))"
 
-  result["$name.size"]="$(docker image inspect "$tag" --format '{{.Size}}' |
-    awk '{ printf "%.0f MB", $1 / 1000 / 1000 }')"
+  # Image size, measured the same way on every Docker version and image store:
+  # - compressed: sum of the layer blobs in the OCI manifest (what a registry stores and a pull
+  #   downloads), from an OCI export of the same (cached) build;
+  # - uncompressed: sum of the layer sizes in the image history (disk space once unpacked).
+  docker buildx build --builder "$BUILDER" --provenance=false --sbom=false \
+    --output "type=oci,dest=$workdir/$name.oci.tar" -f "$ctx/$dockerfile" "$ctx" \
+    >"$workdir/$name-oci.log" 2>&1
+  result["$name.compressed"]="$("$PY" - "$workdir/$name.oci.tar" <<'EOF'
+import json, sys, tarfile
+with tarfile.open(sys.argv[1]) as oci:
+    def blob(digest):
+        return json.load(oci.extractfile("blobs/" + digest.replace(":", "/")))
+    manifest = blob(json.load(oci.extractfile("index.json"))["manifests"][0]["digest"])
+    print(f"{sum(layer['size'] for layer in manifest['layers']) / 1e6:.0f} MB")
+EOF
+)"
+  result["$name.uncompressed"]="$(docker history --no-trunc --human=false --format '{{.Size}}' "$tag" |
+    awk '{ total += $1 } END { printf "%.0f MB", total / 1000 / 1000 }')"
   result["$name.layers"]="$(docker image inspect "$tag" --format '{{len .RootFS.Layers}}')"
   local user
   user="$(docker image inspect "$tag" --format '{{.Config.User}}')"
@@ -151,7 +167,8 @@ row() { printf '| %s | %s | %s |\n' "$1" "${result[naive.$2]}" "${result[optimiz
 {
   echo "| Metric | Before (\`Dockerfile.naive\`) | After (\`Dockerfile\`) |"
   echo "| --- | --- | --- |"
-  row "Image size" size
+  row "Image size, compressed (registry / pull)" compressed
+  row "Image size, uncompressed (on disk)" uncompressed
   row "Layers" layers
   row "Cold build (empty cache)" cold
   row "Rebuild after a one-line change" rebuild
