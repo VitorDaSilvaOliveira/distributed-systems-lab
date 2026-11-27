@@ -1,0 +1,37 @@
+name: Measure images
+
+# Runs scripts/measure-images.sh on a GitHub-hosted runner, so the before/after numbers of
+# step #1 can be reproduced on a standard machine by anyone. Manual on purpose: it takes
+# several minutes and its numbers are reference data, not a pass/fail check.
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: measure-images
+  cancel-in-progress: false
+
+jobs:
+  measure:
+    name: Measure images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece # v1.3.0
+        with:
+          k6-version: "2.4.0"
+      - name: Measure
+        run: scripts/measure-images.sh measurements.md
+      - name: Publish report
+        run: cat measurements.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image-measurements
+          path: measurements.md
