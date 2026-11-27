@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.2](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.2.1...v0.2.2) (2026-11-27)
+
+
+### Documentation
+
+* add an index of architecture decision records ([#27](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/27)) ([4ea1ff6](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/4ea1ff6492e19055532653fec2ede03ae2792601))
+
+
+### Build
+
+* make image measurements reproducible ([#30](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/30)) ([caa40f5](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/caa40f5e76aa08a5874961f0e2e3bd30e5a3dcc3))
+* measure compressed and uncompressed image size ([#31](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/31)) ([2eb882a](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/2eb882a9fb608788ecd2409d8cb9b167f933c367))
+* pin base images by digest ([#28](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/28)) ([8e415a4](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/8e415a4e51e53845f972f73e83526a7ec34336b0))
+* speed up the cold build of the image ([#32](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/32)) ([15190d7](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/15190d77fb2cca986b5752f33d2b52dcd5e10a82))
+
+
+### Continuous Integration
+
+* scan the image for vulnerabilities with Trivy ([#33](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/issues/33)) ([132c048](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/commit/132c0487a67c65ee484b62e0a169e0977169aab0))
+
 ## [0.2.1](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/compare/v0.2.0...v0.2.1) (2026-11-25)
 
 
