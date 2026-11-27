@@ -50,6 +50,22 @@ updates:
       prefix: "build(docker)"
     labels: ["type:dependencies"]
 
+  - package-ecosystem: "docker-compose"
+    directory: "/tools"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    cooldown:
+      default-days: 3
+    groups:
+      tools:
+        patterns: ["*"]
+    commit-message:
+      prefix: "build(tools)"
+    labels: ["type:dependencies"]
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

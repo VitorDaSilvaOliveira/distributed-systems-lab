@@ -4,7 +4,8 @@
 #
 # Usage: scripts/measure-images.sh [REPORT.md]
 #
-# Requires: Docker with Buildx, curl, k6, and python3 (or python). Trivy runs as a container.
+# Requires: Docker with Buildx and Compose, curl, k6, and python3 (or python). Trivy runs as a
+# container, from the image pinned in tools/compose.yaml.
 # Every build runs on a dedicated Buildx builder whose cache is wiped before each cold build,
 # so the numbers do not depend on what was built before on this machine. Builds happen on a
 # temporary copy of order-api/, so the repository is never modified.
@@ -15,7 +16,6 @@ cd "$(git rev-parse --show-toplevel)"
 # Keep Git Bash on Windows from rewriting container paths such as /var/run/docker.sock.
 export MSYS_NO_PATHCONV=1
 
-TRIVY_IMAGE="aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb"
 BUILDER="dsl-measure"
 BASE_PORT=18080
 REPORT="${1:-}"
@@ -33,6 +33,8 @@ cleanup() {
 trap cleanup EXIT
 
 log() { echo ">> $*" >&2; }
+# Trivy from the image pinned in tools/compose.yaml (the same one CI uses).
+trivy() { docker compose -f tools/compose.yaml run --rm -T trivy "$@"; }
 now_ms() { date +%s%3N; }
 seconds() { awk -v ms="$1" 'BEGIN { printf "%.1f s", ms / 1000 }'; }
 
@@ -136,8 +138,7 @@ EOF
   docker rm -f "$container" >/dev/null
 
   log "$name: vulnerability scan (Trivy)"
-  docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v dsl-trivy-cache:/root/.cache \
-    "$TRIVY_IMAGE" image --quiet --scanners vuln --format json "$tag" >"$workdir/$name-trivy.json"
+  trivy image --quiet --scanners vuln --format json "$tag" >"$workdir/$name-trivy.json"
   read -r critical high medium low fixable < <("$PY" - "$workdir/$name-trivy.json" <<'EOF'
 import json, sys
 report = json.load(open(sys.argv[1], encoding="utf-8"))
@@ -187,5 +188,5 @@ row() { printf '| %s | %s | %s |\n' "$1" "${result[naive.$2]}" "${result[optimiz
   echo
   echo "- Docker: $(docker version --format '{{.Server.Version}}') on $(docker info --format '{{.OperatingSystem}}, {{.NCPU}} CPUs, {{.MemTotal}}' |
     awk -F', ' '{ printf "%s, %s, %.1f GB RAM", $1, $2, $3 / 1024 / 1024 / 1024 }')"
-  echo "- Trivy: \`${TRIVY_IMAGE%@*}\`; k6: $(k6 version | head -n 1 | awk '{ print $2 }')"
+  echo "- Trivy: $(trivy --version 2>/dev/null | sed -n 's/^Version: //p'); k6: $(k6 version | head -n 1 | awk '{ print $2 }')"
 } | tee ${REPORT:+"$REPORT"}
