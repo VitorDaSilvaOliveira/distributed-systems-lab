@@ -1,0 +1,21 @@
+# Tool images used by scripts/ and CI, pinned by digest in one place.
+# Dependabot (docker-compose ecosystem) keeps the tags and digests current.
+#
+#   docker compose -f tools/compose.yaml run --rm -T trivy image order-api:ci
+#
+# Paths are relative to the repository root (mounted at /work).
+name: dsl-tools
+
+services:
+  trivy:
+    image: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+    working_dir: /work
+    volumes:
+      # Scans images from the local Docker engine.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ..:/work
+      # Vulnerability database cache: a named volume locally, a directory that CI caches.
+      - ${TRIVY_CACHE:-trivy-cache}:/root/.cache/trivy
+
+volumes:
+  trivy-cache:

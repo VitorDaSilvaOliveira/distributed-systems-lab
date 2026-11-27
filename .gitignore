@@ -17,3 +17,6 @@ Thumbs.db
 # Env / secrets
 .env
 *.env.local
+
+# Scan results
+trivy-results.sarif

@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # New vulnerabilities are published every day: rescan the image weekly even without changes.
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
 
 # Least privilege: no token permissions by default; each job asks for what it needs.
 permissions: {}
@@ -49,9 +53,46 @@ jobs:
     needs: build
     permissions:
       contents: read
+      security-events: write # upload the scan results to code scanning
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Build image
         run: docker build -t order-api:ci order-api
+
+      # Trivy runs from the image pinned in tools/compose.yaml (same as scripts/measure-images.sh).
+      - name: Cache key for the vulnerability database
+        id: trivy-db
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/trivy-cache
+          key: trivy-db-${{ steps.trivy-db.outputs.day }}
+          restore-keys: trivy-db-
+      - name: Scan image (fails on fixable HIGH/CRITICAL vulnerabilities)
+        env:
+          TRIVY_CACHE: ${{ runner.temp }}/trivy-cache
+        run: >-
+          docker compose -f tools/compose.yaml run --rm -T trivy image
+          --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed
+          --ignorefile order-api/.trivyignore.yaml --exit-code 1
+          order-api:ci
+      # All HIGH/CRITICAL findings, fixable or not, go to the Security tab, where they stay
+      # tracked and close by themselves once a rebuilt image no longer has them.
+      - name: Export findings (SARIF)
+        if: ${{ !cancelled() }}
+        env:
+          TRIVY_CACHE: ${{ runner.temp }}/trivy-cache
+        run: >-
+          docker compose -f tools/compose.yaml run --rm -T trivy image
+          --scanners vuln --severity HIGH,CRITICAL --skip-db-update
+          --ignorefile order-api/.trivyignore.yaml
+          --format sarif --output trivy-results.sarif
+          order-api:ci
+      - name: Upload findings to code scanning
+        if: ${{ !cancelled() && hashFiles('trivy-results.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
+        with:
+          sarif_file: trivy-results.sarif
+          category: container-image

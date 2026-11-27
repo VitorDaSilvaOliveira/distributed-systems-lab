@@ -1,0 +1,10 @@
+# Accepted vulnerability findings for the order-api image.
+#
+# CI fails on HIGH and CRITICAL findings that have a fix available. Accepting one instead of fixing
+# it needs a reason and an expiry date; once expired, the finding fails the build again:
+#
+# vulnerabilities:
+#   - id: CVE-YYYY-NNNNN
+#     statement: Why it does not affect this image, or why the fix has to wait (link the issue).
+#     expired_at: 2027-01-31
+vulnerabilities: []

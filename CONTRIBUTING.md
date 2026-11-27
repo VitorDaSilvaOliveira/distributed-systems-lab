@@ -53,3 +53,21 @@ it was translated from. The `Docs` workflow fails when the English file changes 
 scripts/translations.sh check              # what CI runs
 scripts/translations.sh sync README.es.md  # after updating a translation, record the new source version
 ```
+
+## Container image security
+
+CI scans the `order-api` image with Trivy (pinned in [`tools/compose.yaml`](tools/compose.yaml)) on every
+pull request, on `main` and weekly:
+
+- the `Docker image` check **fails on HIGH or CRITICAL vulnerabilities that have a fix available**;
+- all HIGH and CRITICAL findings, fixable or not, are uploaded to the repository's code scanning alerts.
+
+Fix a finding by updating the dependency or the base image digest. If it has to be accepted instead,
+add it to [`order-api/.trivyignore.yaml`](order-api/.trivyignore.yaml) with a `statement` (why) and an
+`expired_at` date. To run the same scan locally:
+
+```bash
+docker build -t order-api:ci order-api
+docker compose -f tools/compose.yaml run --rm -T trivy image --scanners vuln --severity HIGH,CRITICAL \
+  --ignore-unfixed --ignorefile order-api/.trivyignore.yaml --exit-code 1 order-api:ci
+```
