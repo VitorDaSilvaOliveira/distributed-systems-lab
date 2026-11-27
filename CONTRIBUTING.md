@@ -34,7 +34,8 @@ cd order-api
 
 ## Architecture decisions
 
-Any significant decision gets an ADR in [`docs/adr/`](docs/adr/), copied from [`0000-template.md`](docs/adr/0000-template.md).
+Any significant decision gets an ADR in [`docs/adr/`](docs/adr/), copied from [`0000-template.md`](docs/adr/0000-template.md),
+and a row in the [ADR index](docs/adr/README.md).
 
 ## Releases
 
