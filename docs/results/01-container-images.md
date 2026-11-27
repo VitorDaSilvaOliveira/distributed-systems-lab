@@ -20,37 +20,44 @@ with Trivy. The [`Measure images`](../../.github/workflows/measure-images.yml) w
 script on a GitHub-hosted runner (Actions → Measure images → Run workflow); the numbers below come
 from that runner, so anyone can reproduce them on the same kind of machine.
 
-## Baseline (2026-11-27, GitHub-hosted runner)
+## Results (2026-11-27, GitHub-hosted runner)
 
 | Metric | Before (`Dockerfile.naive`) | After (`Dockerfile`) |
 | --- | --- | --- |
 | Image size, compressed (registry / pull) | 294 MB | 95 MB |
 | Image size, uncompressed (on disk) | 691 MB | 257 MB |
 | Layers | 13 | 39 |
-| Cold build (empty cache) | 31.3 s | 47.1 s |
-| Rebuild after a one-line change | 29.5 s | 6.2 s |
-| Time until ready (container start → readiness UP) | 2.8 s | 2.6 s |
-| Spring Boot startup (as logged) | 1.911 s | 1.969 s |
-| Memory after startup (idle) | 183.8MiB | 212.5MiB |
-| k6 p95 latency (20 VUs, 30 s) | 4.1 ms | 4.1 ms |
-| k6 throughput | 194 req/s | 194 req/s |
+| Cold build (empty cache) | 26.3 s | 25.9 s |
+| Rebuild after a one-line change | 19.4 s | 6.0 s |
+| Time until ready (container start → readiness UP) | 2.5 s | 2.4 s |
+| Spring Boot startup (as logged) | 1.662 s | 1.735 s |
+| Memory after startup (idle) | 193.2MiB | 206.4MiB |
+| k6 p95 latency (20 VUs, 30 s) | 4.4 ms | 4.2 ms |
+| k6 throughput | 193 req/s | 194 req/s |
 | k6 failed requests | 0.00 % | 0.00 % |
 | Vulnerabilities: critical / high / medium / low | 0 / 4 / 311 / 5 | 0 / 8 / 30 / 25 |
 | Vulnerabilities with a fix available | 172 | 0 |
 | Shell in the image | yes | no |
 | Runtime user | root | 65532 |
 
-[Workflow run](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/runs/46042855796)
-at commit `046ab9f`: Docker 29.4.2 on Ubuntu 26.04.1 LTS, 4 CPUs, 15.6 GB RAM; Trivy 0.76.2, k6 2.4.0.
-Timings vary a few seconds between runs (an earlier run measured 26.3 s / 44.3 s cold builds);
-compare the two columns, not absolute values.
+[Workflow run](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/runs/46044333192)
+at commit `829322f`: Docker 29.4.2 on Ubuntu 26.04.1 LTS, 4 CPUs, 15.6 GB RAM; Trivy 0.76.2, k6 2.4.0.
+Timings vary a few seconds between runs (the naive cold build measured 26.3–31.3 s and its rebuild
+19.4–29.5 s across three runs); compare the two columns, not absolute values.
+
+## Iterations
+
+| Version of `Dockerfile` | Cold build | Rebuild after a one-line change | Run |
+| --- | --- | --- | --- |
+| 1. Multi-stage on `eclipse-temurin` + Maven Wrapper (`unzip` installed, `dependency:go-offline`) | 47.1 s | 6.2 s | [46042855796](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/runs/46042855796) |
+| 2. Build stage on the official `maven` image, only what `package` needs, no JRE image pull | **25.9 s** | 6.0 s | [46044333192](https://github.com/VitorDaSilvaOliveira/distributed-systems-lab/actions/runs/46044333192) |
 
 ## What the numbers say
 
 - **Size: −68 % compressed** (294 → 95 MB, what every pull downloads) and **−63 % uncompressed**
   (691 → 257 MB on disk). The runtime image carries a JRE and the application, not Maven, a JDK,
   the sources and the local Maven repository.
-- **Rebuild after a one-line change: −79 %** (29.5 → 6.2 s). Dependencies are resolved in their own
+- **Rebuild after a one-line change: −69 %** (19.4 → 6.0 s). Dependencies are resolved in their own
   layer, so a code change only recompiles the code and replaces the small application layer. The naive
   `COPY . .` invalidates everything and downloads every dependency again.
 - **Vulnerabilities: 320 → 63 findings, 172 → 0 with a fix available.** But the "after" image has
@@ -63,15 +70,17 @@ compare the two columns, not absolute values.
   - Counting findings is not enough: what matters is whether they are fixable, where they live and
     whether the image needs that package at all.
 - **Startup and latency: unchanged.** The image changes what ships, not how the JVM runs: same
-  Java 25, same application, ~2 s Spring Boot startup and 4.1 ms p95 in both.
-- **Memory: +16 %** (184 → 213 MiB idle). The "after" image starts the JVM with
+  Java 25, same application, ~1.7 s Spring Boot startup and ~4 ms p95 in both.
+- **Memory: +7 %** (193 → 206 MiB idle). The "after" image starts the JVM with
   `-XX:MaxRAMPercentage=75` (instead of the default 25 %), so it sizes a larger heap from the
   container memory. It is a configuration difference, not a cost of distroless, and it becomes a
   deliberate setting once the container gets a memory limit (step #8).
-- **Cold build: +50 %** (31.3 → 47.1 s; 2.5× slower on a Windows laptop with Docker Desktop). The
-  stages run in parallel and the critical path is the build stage. Profiled locally:
+- **Cold build: the same as the naive image** (26.3 → 25.9 s), after one iteration. The first
+  optimized version was **50 % slower** (31.3 → 47.1 s on the runner, 2.5× on a Windows laptop with
+  Docker Desktop). The stages run in parallel and the critical path was the build stage. Profiled
+  locally:
 
-  | Build step (cold, Docker Desktop) | Time |
+  | Build step of version 1 (cold, Docker Desktop) | Time |
   | --- | --- |
   | `apt-get install unzip` (needed by the Maven Wrapper checksum check) | 46 s |
   | `./mvnw dependency:go-offline` (all dependencies and plugins) | 39 s |
@@ -79,9 +88,10 @@ compare the two columns, not absolute values.
   | `./mvnw package` (the actual compilation) | 6 s |
   | pull of the distroless base (in parallel with the build stage) | 61 s |
 
-  The naive build downloads only what `package` needs and installs nothing. The optimized one pays for
-  a separate dependency layer (which is what makes rebuilds fast) and for `unzip`. The cold build
-  matters on fresh CI runners without a layer cache, so it is the next thing to improve.
+  Version 2 builds on the official `maven` image (Maven already installed and verified through the
+  image digest, so no `unzip` and no Maven download), resolves only what `package` needs by building
+  the project once without sources, and extracts the jar layers in the build stage instead of
+  pulling a JRE image. Its Maven version must match the Maven Wrapper; the build fails if they drift.
 
 ## A note on "image size"
 
