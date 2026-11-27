@@ -42,7 +42,9 @@ updates:
       # Tags carry the Java major version (e.g. 25-jdk): moving to another Java is an ADR.
       - dependency-name: "eclipse-temurin"
         update-types: ["version-update:semver-major"]
-      # Dockerfile.naive is the frozen "before" picture of step #1.
+      # The maven image is the frozen "before" picture (Dockerfile.naive) and the build stage of
+      # Dockerfile, where its Maven version must match the Maven Wrapper (the build checks it):
+      # update its tag and digest by hand together with the wrapper.
       - dependency-name: "maven"
     commit-message:
       prefix: "build(docker)"
